@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dalí Tarot - Surrealist Divination</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-light: #F3E5AB;
+            --gold-dark: #996515;
+            --bg-dark: #0a0a0c;
+            --bg-card: #141419;
+            --bg-surreal: #1a1829;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-red: #8b0000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(139, 0, 0, 0.1) 0%, transparent 50%);
+        }
+
+        header {
+            text-align: center;
+            padding: 2.5rem 1rem 1.5rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8rem;
+            letter-spacing: 6px;
+            color: var(--gold-primary);
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Controls Area */
+        .controls-panel {
+            background: rgba(20, 20, 25, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .spread-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .spread-btn {
+            background: rgba(10, 10, 12, 0.8);
+            border: 1px solid var(--gold-dark);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .spread-btn:hover, .spread-btn.active {
+            background: var(--gold-primary);
+            color: #000;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            font-weight: 600;
+        }
+
+        .action-area {
+            text-align: center;
+        }
+
+        .btn-draw {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            color: #0a0a0c;
+            border: none;
+            padding: 14px 36px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-draw:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .btn-draw:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Shuffle Animation Overlay */
+        .shuffle-stage {
+            height: 220px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .deck-card {
+            width: 110px;
+            height: 180px;
+            position: absolute;
+            border-radius: 8px;
+            background-color: #000;
+            border: 2px solid #333;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dalí Card Back Graphic */
+        .card-back {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-back-circle {
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .card-back-t {
+            font-family: 'Cinzel', serif;
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--gold-primary);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            line-height: 1;
+        }
+
+        /* Spread Layouts */
+        .spread-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        /* Celtic Cross Layout specifics */
+        .spread-celtic {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) 20px repeat(1, 1fr);
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .position-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            color: var(--gold-light);
+            margin-bottom: 8px;
+            text-align: center;
+            height: 2.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Interactive Card Component */
+        .tarot-card {
+            width: 140px;
+            height: 240px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .tarot-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .tarot-card.reversed .card-front-content {
+            transform: rotate(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        .card-face.back {
+            transform: rotateY(0deg);
+        }
+
+        .card-face.front {
+            background: #141318;
+            border: 2px solid var(--gold-primary);
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .card-front-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.5s ease;
+        }
+
+        .card-header {
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+        }
+
+        .card-art-container {
+            flex: 1;
+            margin: 6px 0;
+            background: #000;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .card-art-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .card-footer {
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reversed-tag {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        /* Reading Interpretation Panel */
+        .reading-panel {
+            margin-top: 3rem;
+            background: rgba(20, 20, 25, 0.8);
+            border: 1px solid var(--gold-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            display: none;
+        }
+
+        .reading-panel.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .summary-box {
+            background: rgba(212, 175, 55, 0.05);
+            border-left: 4px solid var(--gold-primary);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 2rem;
+        }
+
+        .summary-box h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-primary);
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-box p {
+            line-height: 1.6;
+            color: #d1d5db;
+        }
+
+        .card-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-card {
+            background: rgba(10, 10, 12, 0.6);
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 8px;
+            padding: 1.2rem;
+        }
+
+        .detail-card h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-light);
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-card .pos-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .detail-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .tarot-card { width: 110px; height: 190px; }
+            .spread-celtic { display: flex; flex-wrap: wrap; }
+            .card-back-circle { width: 45px; height: 45px; }
+            .card-back-t { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Dalí Tarot</h1>
+        <div class="subtitle">Surrealist Divination & Archetypal Readings</div>
+    </header>
+
+    <main>
+        <div class="controls-panel">
+            <div class="spread-selector" id="spreadSelector">
+                <button class="spread-btn active" data-spread="daily">Card of the Day</button>
+                <button class="spread-btn" data-spread="1card">1-Card Draw</button>
+                <button class="spread-btn" data-spread="3card">3-Card (Past, Present, Future)</button>
+                <button class="spread-btn" data-spread="5card">5-Card Elemental</button>
+                <button class="spread-btn" data-spread="love">Love Spread (3 Cards)</button>
+                <button class="spread-btn" data-spread="career">Career Spread (3 Cards)</button>
+                <button class="spread-btn" data-spread="celtic">Celtic Cross (10 Cards)</button>
+            </div>
+            <div class="action-area">
+                <button class="btn-draw" id="btnDraw">Shuffle & Draw Cards</button>
+            </div>
+        </div>
+
+        <!-- Shuffling visual stage -->
+        <div class="shuffle-stage" id="shuffleStage"></div>
+
+        <!-- Grid where drawn cards are displayed -->
+        <div class="spread-grid" id="spreadGrid"></div>
+
+        <!-- Synthetic Reading / Interpretation Output -->
+        <div class="reading-panel" id="readingPanel">
+            <div class="summary-box">
+                <h2>Synthesis & Reading Overview</h2>
+                <p id="synthesisText">Your cosmic synthesis will appear here once the cards are drawn...</p>
+            </div>
+            <div class="card-details-grid" id="cardDetailsGrid"></div>
+        </div>
+    </main>
+
+    <script>
+        // --- TAROT DECK DATA (Major & Representative Minor Arcana in Dalí Style) ---
+        const TAROT_DECK = [
+            {
+                id: "0",
+                name: "0. The Fool",
+                upright: "Spontaneity, new beginnings, leap of faith, unbounded freedom, innocent trust.",
+                reversed: "Recklessness, fear of risk, foolish decisions, apathy, hesitation.",
+                theme: "A melting butterfly wing over an endless desert abyss with a towering golden crutch.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#1a0f1a"/>
+                    <path d="M10,120 Q50,90 90,120 L100,150 L0,150 Z" fill="#b38728"/>
+                    <ellipse cx="50" cy="50" rx="35" ry="15" fill="#e2e8f0" opacity="0.3"/>
+                    <path d="M50,20 L50,110 M40,110 L60,110" stroke="#D4AF37" stroke-width="3"/>
+                    <path d="M30,40 Q50,10 70,40 Q50,70 30,40 Z" fill="#8b0000" opacity="0.8"/>
+                    <circle cx="50" cy="40" r="6" fill="#fff"/>
+                </svg>`
+            },
+            {
+                id: "1",
+                name: "I. The Magician",
+                upright: "Manifestation, resourcefulness, deliberate power, creative action, mastery.",
+                reversed: "Manipulation, illusions, unused talent, wasted potential, deception.",
+                theme: "Floating geometrical solids, soft clocks, and a single geometric wand pointing skyward.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0f1a1a"/>
+                    <circle cx="50" cy="50" r="30" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+                    <polygon points="50,15 80,70 20,70" fill="none" stroke="#996515" stroke-width="2"/>
+                    <path d="M35,90 Q50,80 65,95 Q50,110 35,90 Z" fill="#d4af37" opacity="0.6"/>
+                    <line x1="50" y1="30" x2="50" y2="130" stroke="#fff" stroke-width="2"/>
+                </svg>`
+            },
+            {
+                id: "2",
+                name: "II. The High Priestess",
+                upright: "Intuition, sacred mystery, subconscious mind, divine feminine, veiled secrets.",
+                reversed: "Repressed feelings, superficial secrets, disconnected intuition, hidden motives.",
+                theme: "A split veil revealing a luminous floating eye in a quiet ocean landscape.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0b1120"/>
+                    <path d="M20,0 L20,150 M80,0 L80,150" stroke="#475569" stroke-width="4"/>
+                    <circle cx="50" cy="65" r="22" fill="#e2e8f0"/>
+                    <path d="M30,65 Q50,35 70,65 Q50,95 30,65 Z" fill="#0b1120"/>
+                    <circle cx="50" cy="65" r="8" fill="#D4AF37"/>
+                    <path d="M10,130 Q50,110 90,130" stroke="#D4AF37" stroke-width="2" fill="none"/>
+                </svg>`
+            },
+            {
+                id: "3",
+                name: "III. The Empress",
+                upright: "Abundance, creation, fertility, nature, sensory gratification, nurturing.",
+                reversed: "Creative block, dependence, smothering energy, emptiness, disharmony.",
+                theme: "A golden egg sprouting surreal roots into a vibrant violet skyline.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#1a0c13"/>
+                    <ellipse cx="50" cy="80" rx="25" ry="35" fill="#D4AF37"/>
+                    <path d="M50,45 L50,10 M50,25 L35,15 M50,30 L65,20" stroke="#22c55e" stroke-width="2"/>
+                    <circle cx="50" cy="80" r="12" fill="#8b0000"/>
+                </svg>`
+            },
+            {
+                id: "4",
+                name: "IV. The Emperor",
+                upright: "Authority, structure, solid foundation, discipline, protection, logic.",
+                reversed: "Tyranny, rigidity, lack of control, inflexibility, overbearing dominance.",
+                theme: "A stone cubical throne resting on long spindly elephant legs over an arid plain.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#1c100b"/>
+                    <rect x="30" y="30" width="40" height="40" fill="#475569" stroke="#D4AF37" stroke-width="2"/>
+                    <line x1="35" y1="70" x2="25" y2="140" stroke="#996515" stroke-width="2"/>
+                    <line x1="65" y1="70" x2="75" y2="140" stroke="#996515" stroke-width="2"/>
+                    <polygon points="50,10 65,28 35,28" fill="#D4AF37"/>
+                </svg>`
+            },
+            {
+                id: "5",
+                name: "V. The Hierophant",
+                upright: "Tradition, wisdom, spiritual belief systems, guidance, institution, conformity.",
+                reversed: "Rebellion, unconventional lifestyle, rigid dogma, personal beliefs, freedom.",
+                theme: "A golden key melting over a keyhole suspended in infinite space.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#181325"/>
+                    <circle cx="50" cy="50" r="18" fill="none" stroke="#D4AF37" stroke-width="3"/>
+                    <path d="M50,68 L50,120 M40,85 L60,85 M40,100 L60,100" stroke="#D4AF37" stroke-width="3"/>
+                    <path d="M35,50 C35,70 65,70 65,50" fill="none" stroke="#fff" stroke-width="1.5"/>
+                </svg>`
+            },
+            {
+                id: "6",
+                name: "VI. The Lovers",
+                upright: "Harmony, relationships, deep choices, alignment of values, soul connections.",
+                reversed: "Disharmony, mismatched values, indecision, inner conflict, detachment.",
+                theme: "Two entwined silhouettes forming the shape of an hourglass with golden sand.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#1a0f14"/>
+                    <path d="M30,30 Q50,70 30,110 M70,30 Q50,70 70,110" stroke="#D4AF37" stroke-width="3" fill="none"/>
+                    <circle cx="50" cy="70" r="8" fill="#8b0000"/>
+                    <line x1="20" y1="30" x2="80" y2="30" stroke="#F3E5AB" stroke-width="2"/>
+                    <line x1="20" y1="110" x2="80" y2="110" stroke="#F3E5AB" stroke-width="2"/>
+                </svg>`
+            },
+            {
+                id: "7",
+                name: "VII. The Chariot",
+                upright: "Willpower, determination, success, triumph over opposition, direction.",
+                reversed: "Lack of control, aggression, forcefulness, directionlessness, obstacles.",
+                theme: "A mechanical beetle hauling a hyper-cube across a surreal geometric landscape.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0f172a"/>
+                    <polygon points="50,20 85,50 85,100 50,130 15,100 15,50" fill="none" stroke="#D4AF37" stroke-width="2"/>
+                    <circle cx="50" cy="75" r="15" fill="#8b0000"/>
+                    <line x1="15" y1="50" x2="85" y2="100" stroke="#D4AF37" stroke-width="1"/>
+                    <line x1="85" y1="50" x2="15" y2="100" stroke="#D4AF37" stroke-width="1"/>
+                </svg>`
+            },
+            {
+                id: "8",
+                name: "VIII. Strength",
+                upright: "Inner courage, compassion, restraint, soft influence, resilience.",
+                reversed: "Self-doubt, raw emotion, weakness, insecurity, low energy.",
+                theme: "A lion made of ethereal smoke submitting gently to a floating porcelain hand.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#1f150a"/>
+                    <path d="M30,80 Q50,40 70,80 Q50,120 30,80 Z" fill="none" stroke="#D4AF37" stroke-width="2"/>
+                    <path d="M35,40 Q50,20 65,40" stroke="#fff" stroke-width="2" fill="none"/>
+                    <circle cx="50" cy="80" r="10" fill="#d4af37" opacity="0.7"/>
+                </svg>`
+            },
+            {
+                id: "9",
+                name: "IX. The Hermit",
+                upright: "Soul-searching, introspection, solitude, inner guidance, enlightenment.",
+                reversed: "Isolation, loneliness, withdrawal, foolish paranoia, rejection of advice.",
+                theme: "A lonely burning lantern hovering inside a hollow crystalline mountain.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#090d16"/>
+                    <polygon points="50,20 90,130 10,130" fill="#141c2e" stroke="#334155"/>
+                    <circle cx="50" cy="65" r="12" fill="#F3E5AB"/>
+                    <polygon points="50,55 53,62 60,65 53,68 50,75 47,68 40,65 47,62" fill="#D4AF37"/>
+                </svg>`
+            },
+            {
+                id: "10",
+                name: "X. Wheel of Fortune",
+                upright: "Change, destiny, fateful turns, life cycles, inevitable progression.",
+                reversed: "Bad luck, resistance to change, breaking cycles, unexpected setbacks.",
+                theme: "A melting clock face embedded in a golden celestial astrology wheel.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#191309"/>
+                    <circle cx="50" cy="75" r="35" fill="none" stroke="#D4AF37" stroke-width="3"/>
+                    <circle cx="50" cy="75" r="20" fill="none" stroke="#996515" stroke-width="1.5"/>
+                    <path d="M50,40 C65,40 70,80 50,100 C30,80 35,40 50,40 Z" fill="none" stroke="#fff" stroke-width="1"/>
+                    <line x1="50" y1="75" x2="65" y2="60" stroke="#D4AF37" stroke-width="2"/>
+                </svg>`
+            },
+            {
+                id: "13",
+                name: "XIII. Death",
+                upright: "Transformation, end of a cycle, rebirth, letting go, profound transition.",
+                reversed: "Fear of change, stagnation, holding on, delayed rebirth, decay.",
+                theme: "A phoenix skeleton sprouting vibrant red flora in a quiet desert landscape.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0d0d11"/>
+                    <path d="M20,130 Q50,40 80,130" stroke="#475569" stroke-width="2" fill="none"/>
+                    <circle cx="50" cy="50" r="14" fill="none" stroke="#8b0000" stroke-width="3"/>
+                    <path d="M50,64 L50,110 M35,80 L65,80" stroke="#D4AF37" stroke-width="2"/>
+                </svg>`
+            },
+            {
+                id: "18",
+                name: "XVIII. The Moon",
+                upright: "Illusion, shadow self, intuition, dreams, subconscious fear, surreal truth.",
+                reversed: "Release of fear, clarity, unveiling secrets, overcoming anxiety.",
+                theme: "A glowing crescent moon weeping golden tears over two melting towers.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0a111e"/>
+                    <circle cx="50" cy="50" r="25" fill="#F3E5AB"/>
+                    <circle cx="60" cy="45" r="22" fill="#0a111e"/>
+                    <rect x="20" y="90" width="12" height="40" fill="#334155"/>
+                    <rect x="68" y="90" width="12" height="40" fill="#334155"/>
+                    <circle cx="50" cy="70" r="2" fill="#D4AF37"/>
+                    <circle cx="45" cy="80" r="2" fill="#D4AF37"/>
+                    <circle cx="55" cy="85" r="2" fill="#D4AF37"/>
+                </svg>`
+            },
+            {
+                id: "19",
+                name: "XIX. The Sun",
+                upright: "Radiance, vitality, joy, clarity, success, creative expression, warmth.",
+                reversed: "Temporary depression, blocked joy, over-optimism, clouded perception.",
+                theme: "A giant golden eye radiating surreal flaming rays over a calm shoreline.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#241607"/>
+                    <circle cx="50" cy="60" r="22" fill="#D4AF37"/>
+                    <circle cx="50" cy="60" r="8" fill="#8b0000"/>
+                    <path d="M50,20 L50,30 M50,90 L50,100 M10,60 L20,60 M80,60 L90,60 M22,32 L30,40 M70,80 L78,88 M22,88 L30,80 M70,40 L78,32" stroke="#F3E5AB" stroke-width="2.5"/>
+                </svg>`
+            },
+            {
+                id: "21",
+                name: "XXI. The World",
+                upright: "Completion, integration, accomplishment, travel, wholeness, fulfillment.",
+                reversed: "Incompletion, lack of closure, delay, short-cuts, lingering tasks.",
+                theme: "A cosmic ouroboros serpent surrounding a floating golden sphere in deep space.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0c0d1a"/>
+                    <circle cx="50" cy="75" r="32" fill="none" stroke="#D4AF37" stroke-width="3"/>
+                    <circle cx="50" cy="75" r="18" fill="#8b0000"/>
+                    <polygon points="50,35 60,50 40,50" fill="#F3E5AB"/>
+                    <polygon points="50,115 60,100 40,100" fill="#F3E5AB"/>
+                </svg>`
+            },
+            {
+                id: "ace-swords",
+                name: "Ace of Swords",
+                upright: "Raw intellect, breakthrough, mental clarity, sharp truth, new idea.",
+                reversed: "Confusion, hostility, clouded judgment, miscommunication, chaos.",
+                theme: "A floating razor-sharp sword splitting a liquid glass sphere into two halves.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#0f172a"/>
+                    <path d="M50,15 L55,100 L50,105 L45,100 Z" fill="#e2e8f0"/>
+                    <rect x="38" y="105" width="24" height="4" fill="#D4AF37"/>
+                    <rect x="48" y="109" width="4" height="20" fill="#996515"/>
+                    <circle cx="50" cy="50" r="25" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4,4"/>
+                </svg>`
+            },
+            {
+                id: "ace-cups",
+                name: "Ace of Cups",
+                upright: "Overflowing emotion, spiritual love, intuition, compassion, open heart.",
+                reversed: "Emotional drain, blocked feelings, self-love deficits, repressed intuition.",
+                theme: "A floating chalice weeping liquid gold into a sea of levitating raindrops.",
+                artSvg: `<svg viewBox="0 0 100 150">
+                    <rect width="100" height="150" fill="#081521"/>
+                    <path d="M30,40 Q50,90 70,40 Z" fill="#D4AF37"/>
+                    <rect x="47" y="75" width="6" height="30" fill="#996515"/>
+                    <rect x="35" y="105" width="30" height="5" fill="#D4AF37"/>
+                    <circle cx="50" cy="25" r="4" fill="#fff"/>
+                    <circle cx="40" cy="18" r="3" fill="#fff"/>
+                    <circle cx="60" cy="18" r="3" fill="#fff"/>
+                </svg>`
+            }
+        ];
+
+        // --- SPREAD DEFINITIONS ---
+        const SPREADS = {
+            "daily": {
+                name: "Card of the Day",
+                count: 1,
+                positions: ["Daily Archetype & Focus"],
+                synthesis: "This single card illuminates the primary surreal current shaping your day."
+            },
+            "1card": {
+                name: "1-Card Draw",
+                count: 1,
+                positions: ["The Core Essence"],
+                synthesis: "Direct insight into your immediate question or present state of consciousness."
+            },
+            "3card": {
+                name: "3-Card Spread",
+                count: 3,
+                positions: ["Past / Root Foundation", "Present / Current Realities", "Future / Looming Horizon"],
+                synthesis: "Traces the timeline of your inquiry from structural origins to future possibilities."
+            },
+            "5card": {
+                name: "5-Card Elemental Spread",
+                count: 5,
+                positions: ["Center / Core Self", "Fire / Passion & Will", "Water / Emotion & Intuition", "Air / Thoughts & Truth", "Earth / Material Reality"],
+                synthesis: "Evaluates your holistic balance across all fundamental planes of existence."
+            },
+            "love": {
+                name: "Love & Connection",
+                count: 3,
+                positions: ["Your Energy", "The Partner/Other's Energy", "Dynamic Bond / Outcome"],
+                synthesis: "Explores the relational mirror between two spirits and their collective dynamic."
+            },
+            "career": {
+                name: "Career & Ambition",
+                count: 3,
+                positions: ["Current Ambition State", "Hidden Obstacle / Challenge", "Path to Mastery & Success"],
+                synthesis: "Examines career trajectories, creative blockages, and practical action paths."
+            },
+            "celtic": {
+                name: "Celtic Cross",
+                count: 10,
+                positions: [
+                    "1. Heart of the Matter",
+                    "2. Crossing / Obstacle",
+                    "3. Root / Unconscious",
+                    "4. Recent Past",
+                    "5. Higher Potential / Crown",
+                    "6. Immediate Future",
+                    "7. Self Perception",
+                    "8. External Environment",
+                    "9. Hopes & Fears",
+                    "10. Ultimate Outcome"
+                ],
+                synthesis: "A deep, comprehensive archetypal mapping of your entire situation."
+            }
+        };
+
+        // State Management
+        let selectedSpreadKey = "daily";
+        let drawnCards = [];
+        let isShuffling = false;
+
+        // UI Element References
+        const spreadSelector = document.getElementById("spreadSelector");
+        const btnDraw = document.getElementById("btnDraw");
+        const shuffleStage = document.getElementById("shuffleStage");
+        const spreadGrid = document.getElementById("spreadGrid");
+        const readingPanel = document.getElementById("readingPanel");
+        const synthesisText = document.getElementById("synthesisText");
+        const cardDetailsGrid = document.getElementById("cardDetailsGrid");
+
+        // Event Listeners for Selector
+        spreadSelector.addEventListener("click", (e) => {
+            if (e.target.classList.contains("spread-btn")) {
+                document.querySelectorAll(".spread-btn").forEach(b => b.classList.remove("active"));
+                e.target.classList.add("active");
+                selectedSpreadKey = e.target.getAttribute("data-spread");
+                resetDisplay();
+            }
+        });
+
+        btnDraw.addEventListener("click", startReadingSequence);
+
+        function resetDisplay() {
+            spreadGrid.innerHTML = "";
+            readingPanel.classList.remove("active");
+            shuffleStage.innerHTML = "";
+            createDeckGraphic();
+        }
+
+        function createDeckGraphic() {
+            shuffleStage.innerHTML = "";
+            for (let i = 0; i < 5; i++) {
+                const card = document.createElement("div");
+                card.className = "deck-card";
+                card.style.transform = `translateY(${i * -2}px) rotate(${ (i - 2) * 1.5 }deg)`;
+                card.innerHTML = `
+                    <div class="card-back">
+                        <div class="card-back-circle">
+                            <span class="card-back-t">T</span>
+                        </div>
+                    </div>
+                `;
+                shuffleStage.appendChild(card);
+            }
+        }
+
+        // Initialize stage
+        createDeckGraphic();
+
+        // Execution Handler
+        function startReadingSequence() {
+            if (isShuffling) return;
+            isShuffling = true;
+            btnDraw.disabled = true;
+            readingPanel.classList.remove("active");
+            spreadGrid.innerHTML = "";
+
+            // Perform Shuffle Animation
+            const deckCards = document.querySelectorAll(".deck-card");
+            let count = 0;
+            const shuffleInterval = setInterval(() => {
+                deckCards.forEach((card) => {
+                    const randomX = (Math.random() - 0.5) * 160;
+                    const randomY = (Math.random() - 0.5) * 40;
+                    const randomRot = (Math.random() - 0.5) * 45;
+                    card.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRot}deg)`;
+                });
+                count++;
+                if (count > 6) {
+                    clearInterval(shuffleInterval);
+                    setTimeout(() => {
+                        deckCards.forEach((card, idx) => {
+                            card.style.transform = `translateY(${idx * -2}px) rotate(0deg)`;
+                        });
+                        setTimeout(() => {
+                            drawCards();
+                            isShuffling = false;
+                            btnDraw.disabled = false;
+                        }, 400);
+                    }, 300);
+                }
+            }, 150);
+        }
+
+        function drawCards() {
+            const spreadConfig = SPREADS[selectedSpreadKey];
+            const deckCopy = [...TAROT_DECK];
+            drawnCards = [];
+
+            // Random draw logic with orientation state
+            for (let i = 0; i < spreadConfig.count; i++) {
+                const randomIndex = Math.floor(Math.random() * deckCopy.length);
+                const cardData = deckCopy.splice(randomIndex, 1)[0];
+                const isReversed = Math.random() < 0.35; // 35% chance of reversed draw
+                drawnCards.push({
+                    ...cardData,
+                    positionName: spreadConfig.positions[i],
+                    isReversed: isReversed
+                });
+            }
+
+            renderSpreadCards(spreadConfig);
+            generateInterpretation(spreadConfig);
+        }
+
+        function renderSpreadCards(spreadConfig) {
+            spreadGrid.className = selectedSpreadKey === "celtic" ? "spread-celtic" : "spread-grid";
+            spreadGrid.innerHTML = "";
+
+            drawnCards.forEach((card, index) => {
+                const slot = document.createElement("div");
+                slot.className = "card-slot";
+
+                const posTitle = document.createElement("div");
+                posTitle.className = "position-title";
+                posTitle.innerText = card.positionName;
+
+                const cardEl = document.createElement("div");
+                cardEl.className = `tarot-card ${card.isReversed ? "reversed" : ""}`;
+                
+                cardEl.innerHTML = `
+                    <div class="card-face back">
+                        <div class="card-back">
+                            <div class="card-back-circle">
+                                <span class="card-back-t">T</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-face front">
+                        <div class="card-front-content">
+                            <div class="card-header">${card.name}</div>
+                            <div class="card-art-container">${card.artSvg}</div>
+                            <div class="card-footer">
+                                ${card.isReversed ? '<span class="reversed-tag">Reversed</span>' : 'Upright'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                slot.appendChild(posTitle);
+                slot.appendChild(cardEl);
+                spreadGrid.appendChild(slot);
+
+                // Sequential Flip Animation
+                setTimeout(() => {
+                    cardEl.classList.add("flipped");
+                }, 300 + (index * 250));
+            });
+        }
+
+        function generateInterpretation(spreadConfig) {
+            setTimeout(() => {
+                readingPanel.classList.add("active");
+                
+                // Construct Synthesis Overview
+                let reversedCount = drawnCards.filter(c => c.isReversed).length;
+                let summaryIntro = `${spreadConfig.synthesis} You have drawn ${drawnCards.length} card(s), with ${reversedCount} operating in a reversed orientation. `;
+                
+                if (reversedCount > drawnCards.length / 2) {
+                    summaryIntro += "The concentration of reversed energy suggests internal blocks, hidden dynamics, or a need to re-examine inward perceptions before moving forward outward.";
+                } else {
+                    summaryIntro += "The primary upright alignments indicate clear momentum, direct expression of elemental forces, and conscious awareness in your present journey.";
+                }
+                
+                synthesisText.innerText = summaryIntro;
+
+                // Build Individual Breakdown Cards
+                cardDetailsGrid.innerHTML = "";
+                drawnCards.forEach(card => {
+                    const detail = document.createElement("div");
+                    detail.className = "detail-card";
+                    detail.innerHTML = `
+                        <h3>
+                            <span>${card.name}</span>
+                            <span style="color: ${card.isReversed ? '#e53e3e' : '#D4AF37'}; font-size: 0.8rem;">
+                                ${card.isReversed ? '(Reversed)' : '(Upright)'}
+                            </span>
+                        </h3>
+                        <span class="pos-name">Position: ${card.positionName}</span>
+                        <p><strong>Archetypal Imagery:</strong> ${card.theme}</p>
+                        <p style="margin-top: 8px;">
+                            <strong>Interpretation:</strong> ${card.isReversed ? card.reversed : card.upright}
+                        </p>
+                    `;
+                    cardDetailsGrid.appendChild(detail);
+                });
+
+                // Smooth scroll down to interpretation
+                readingPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300 + (drawnCards.length * 250) + 200);
+        }
+    </script>
+</body>
+</html>
