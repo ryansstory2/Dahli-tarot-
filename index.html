@@ -25,9 +25,9 @@
         }
         h1 {
             color: var(--accent-gold);
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             letter-spacing: 1px;
         }
         .container {
@@ -43,7 +43,7 @@
             background: linear-gradient(135deg, #4a235a, #2c1638);
             color: var(--accent-gold);
             border: 1px solid var(--border-purple);
-            padding: 15px;
+            padding: 14px;
             font-size: 1rem;
             font-weight: bold;
             border-radius: 8px;
@@ -59,7 +59,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .action-btn {
             background: #311b4a;
@@ -69,10 +69,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 0.9rem;
         }
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -80,7 +81,7 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border-purple);
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -89,64 +90,63 @@
         }
         .card-position {
             color: var(--accent-gold);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .card-visual {
-            width: 130px;
-            height: 180px;
+        .card-img-container {
+            width: 140px;
+            height: 200px;
+            position: relative;
             border-radius: 6px;
+            overflow: hidden;
             border: 1px solid var(--accent-gold);
-            background: linear-gradient(145deg, #1f1432, #100b1d);
+            background: #120c1f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+        }
+        .fallback-art {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: linear-gradient(145deg, #1f1432, #100b1d);
+            color: var(--accent-gold);
             padding: 10px;
             box-sizing: border-box;
-            position: relative;
-            overflow: hidden;
-        }
-        .card-visual img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-            border-radius: 5px;
-        }
-        .card-symbol {
-            font-size: 1.8rem;
-            color: var(--accent-gold);
-            z-index: 1;
-            margin-bottom: 5px;
-        }
-        .card-title-fallback {
-            font-size: 0.75rem;
-            color: var(--text-purple);
-            font-weight: bold;
-            z-index: 1;
             text-align: center;
+            z-index: 1;
         }
         .card-info {
-            margin-top: 10px;
+            margin-top: 8px;
             font-size: 0.85rem;
             width: 100%;
         }
         .card-name {
             font-weight: bold;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
         .card-keywords {
             font-style: italic;
             color: var(--sub-purple);
-            font-size: 0.8rem;
-            margin-top: 3px;
+            font-size: 0.75rem;
+            margin-top: 2px;
         }
         .summary-box {
             background-color: var(--card-bg);
@@ -159,7 +159,7 @@
         .summary-box h3 {
             color: var(--accent-gold);
             margin-top: 0;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
         }
         .hidden {
             display: none !important;
@@ -185,7 +185,7 @@
     <div id="reading-view" class="hidden">
         <div class="top-bar">
             <button class="action-btn" onclick="showMenu()">← MENU</button>
-            <span id="reading-title" style="font-weight: bold; color: var(--accent-gold);"></span>
+            <span id="reading-title" style="font-weight: bold; color: var(--accent-gold); font-size: 0.95rem;"></span>
             <button class="action-btn" onclick="generateReading()">🔄 REDRAW</button>
         </div>
 
@@ -193,7 +193,7 @@
 
         <div class="summary-box">
             <h3>Reading Summary & Synthesis</h3>
-            <div id="summary-content" style="font-size: 0.9rem; line-height: 1.5;"></div>
+            <div id="summary-content" style="font-size: 0.85rem; line-height: 1.4;"></div>
         </div>
     </div>
 </div>
@@ -249,7 +249,6 @@ function generateReading() {
     const positions = config.positions;
     const shuffled = shuffleArray(TAROT_CARDS);
     
-    // Pick cards (looping if the spread needs more cards than uploaded)
     const drawnCards = [];
     for (let i = 0; i < positions.length; i++) {
         drawnCards.push(shuffled[i % shuffled.length]);
@@ -264,8 +263,12 @@ function generateReading() {
         
         box.innerHTML = `
             <div class="card-position">${positions[index]}</div>
-            <div class="card-visual">
-                <img src="${card.filename}" alt="${card.name}">
+            <div class="card-img-container">
+                <div class="fallback-art">
+                    <div style="font-size: 1.4rem; margin-bottom: 2px;">👁️</div>
+                    <div style="font-size: 0.65rem; font-weight: bold;">${card.name}</div>
+                </div>
+                <img src="${card.filename}" alt="${card.name}" onerror="if(!this.triedUpper){this.triedUpper=true;this.src=this.src.replace('.jpg','.JPG');}else{this.style.display='none';}">
             </div>
             <div class="card-info">
                 <div class="card-name">${card.name}</div>
