@@ -268,7 +268,20 @@ function generateReading() {
                     <div style="font-size: 1.4rem; margin-bottom: 2px;">👁️</div>
                     <div style="font-size: 0.65rem; font-weight: bold;">${card.name}</div>
                 </div>
-                <img src="${card.filename}" alt="${card.name}" onerror="if(!this.triedUpper){this.triedUpper=true;this.src=this.src.replace('.jpg','.JPG');}else{this.style.display='none';}">
+                <img src="${card.filename}" alt="${card.name}" onerror="
+                    if(this.dataset.step === undefined) {
+                        this.dataset.step = '1';
+                        this.src = this.src.toLowerCase();
+                    } else if(this.dataset.step === '1') {
+                        this.dataset.step = '2';
+                        this.src = this.src.toUpperCase();
+                    } else if(this.dataset.step === '2') {
+                        this.dataset.step = '3';
+                        this.src = this.src.replace('.jpg', '.JPG');
+                    } else {
+                        this.style.display = 'none';
+                    }
+                ">
             </div>
             <div class="card-info">
                 <div class="card-name">${card.name}</div>
